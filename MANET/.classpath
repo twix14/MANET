@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="Z:/Downloads/gossip-0.1.1-incubating.jar"/>
-	<classpathentry exported="true" kind="lib" path="Z:/Downloads/org.hive2hive.core-1.2.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/fc46383/eclipse-workspace/manet/MANET/gossip-0.1.1-incubating.jar"/>
+	<classpathentry kind="lib" path="C:/Users/fc46383/eclipse-workspace/manet/MANET/org.hive2hive.core-1.2.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
