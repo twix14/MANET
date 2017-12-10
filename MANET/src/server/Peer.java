@@ -23,12 +23,13 @@ public class Peer implements Serializable {
 
 	private static final long serialVersionUID = 4318690273286226312L;
 
-	private DatagramSocket socket;
+	private transient DatagramSocket socket;
+	
 	private InetAddress ip;
 	private int port;
-	private List<byte[]> receiveArray;
-	private List<Peer> neighbors;
-	private BlockingQueue<Event> events;
+	private transient List<byte[]> receiveArray;
+	private transient List<Peer> neighbors;
+	private transient BlockingQueue<Event> events;
 	private Coordinate coord;
 
 	public Peer(int port, InetAddress ip, Coordinate coord) {
@@ -39,9 +40,12 @@ public class Peer implements Serializable {
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
+		neighbors = new LinkedList<>();
 		receiveArray = new LinkedList<>();
 		events = new LinkedBlockingQueue<>();
 		this.setCoord(coord);
+		new ReceiveThread().start();
+		new SendThread().start();
 	}
 
 	public void start() {
@@ -62,8 +66,6 @@ public class Peer implements Serializable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		new ReceiveThread().start();
-		new SendThread().start();
 	}
 
 	private String getInetAddress() {

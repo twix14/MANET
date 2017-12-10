@@ -5,9 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.InetAddress;
 
-public class Event {
+public class Event implements Serializable{
+	private static final long serialVersionUID = -962652137307409545L;
 	
 	private boolean join;
 	private Peer peer;

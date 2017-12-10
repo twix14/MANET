@@ -1,6 +1,9 @@
 package server;
 
-public class Coordinate {
+import java.io.Serializable;
+
+public class Coordinate implements Serializable {
+	private static final long serialVersionUID = -7888511295412357123L;
 	
 	private int lat;
 	private int lng;

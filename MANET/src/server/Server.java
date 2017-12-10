@@ -25,6 +25,7 @@ public class Server {
 		}
 		
 		Scanner sc = new Scanner(System.in);
+		System.out.println("Peer started!");
 		try {
 			
 			while(true) {
