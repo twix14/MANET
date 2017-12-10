@@ -45,8 +45,7 @@ public class Peer implements Serializable {
 	}
 
 	public void start() {
-		new ReceiveThread().start();
-		new SendThread().start();
+		
 		String viewPeer = getInetAddress();
 		Event ev = new Event();
 		String[] split = viewPeer.split(":");
@@ -63,7 +62,8 @@ public class Peer implements Serializable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
+		new ReceiveThread().start();
+		new SendThread().start();
 	}
 
 	private String getInetAddress() {
@@ -167,12 +167,14 @@ public class Peer implements Serializable {
 				if(coord.checkDistance(ev.getPeer().getCoord()) || neighbors.size() <= 4) {
 					if(ev.isJoin()) {
 						addNeighbor(ev.getPeer());
+						System.out.println("Added Neighbor - " + ev.getPeer().getIp() + " to my view");
 					} else {
 						//data
 						//pub/sub
 					}
 				} else if (neighbors.size() == 5) {
 					events.put(new Event("View of node is full"));
+					System.out.println("My view is full");
 					//else discard
 				}
 
@@ -235,6 +237,7 @@ public class Peer implements Serializable {
 					if(neighbors.isEmpty()) {
 						send = new DatagramPacket(sendData, sendData.length, 
 								ev.getConnectTo(), ev.getPortConnectTo());
+						System.out.println("Trying to add myself to " + ev.getConnectTo() + " view");
 					} else {
 						for(Peer p : neighbors) {
 							send = new DatagramPacket(sendData, sendData.length, 
