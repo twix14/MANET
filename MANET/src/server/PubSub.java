@@ -1,11 +1,17 @@
 package server;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class PubSub {
 
 	private List<EventType> subscriptions;
 	private List<Event> publishings;
+	
+	public PubSub() {
+		subscriptions = new LinkedList<>();
+		publishings = new LinkedList<>();
+	}
 	
 	public List<EventType> getSubscriptions() {
 		return subscriptions;

@@ -42,6 +42,7 @@ public class Peer implements Serializable {
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
+		pubsub = new PubSub();
 		NETWORK_DIAMETER = network;
 		neighbors = new LinkedList<>();
 		events = new LinkedBlockingQueue<>();
@@ -292,8 +293,9 @@ public class Peer implements Serializable {
 							}
 
 						}
+						System.out.println("All events were forwaded!");
 					}
-					System.out.println("All events were forwaded!");
+					
 				}
 			}
 		}
