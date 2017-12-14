@@ -23,13 +23,14 @@ public class Peer implements Serializable {
 
 	private static final long serialVersionUID = 4318690273286226312L;
 
-	private transient DatagramSocket socket;
-	
-	private InetAddress ip;
-	private int port;
 	private transient List<byte[]> receiveArray;
 	private transient List<Peer> neighbors;
 	private transient BlockingQueue<Event> events;
+	private transient DatagramSocket socket;
+	private transient PubSub pubsub;
+
+	private InetAddress ip;
+	private int port;
 	private Coordinate coord;
 
 	public Peer(int port, InetAddress ip, Coordinate coord) {
@@ -48,8 +49,7 @@ public class Peer implements Serializable {
 		new SendThread().start();
 	}
 
-	public void start() {
-		
+	public void start(){
 		String viewPeer = getInetAddress();
 		Event ev = new Event();
 		String[] split = viewPeer.split(":");
@@ -135,6 +135,11 @@ public class Peer implements Serializable {
 		this.coord = coord;
 	}
 
+	public void subscribe(EventType type) {
+		PubSub.printSub(type);
+		pubsub.getSubscriptions().add(type);
+	}
+
 	public InetAddress getIp() {
 		return ip;
 	}
@@ -158,47 +163,51 @@ public class Peer implements Serializable {
 		}
 
 		public void run() {
-			byte[] receiveData = new byte[1024];
-			DatagramPacket receive = new DatagramPacket(receiveData,
-					receiveData.length);
+			while(true) {
+				byte[] receiveData = new byte[1024];
+				DatagramPacket receive = new DatagramPacket(receiveData,
+						receiveData.length);
 
-			try {
-				socket.receive(receive);
-				Event ev = Event.deserializeBA(receive.getData());
+				try {
+					socket.receive(receive);
+					Event ev = Event.deserializeBA(receive.getData());
+					System.out.println("Data received");
 
-				if(coord.checkDistance(ev.getPeer().getCoord()) || neighbors.size() <= 4) {
-					if(ev.isJoin()) {
-						addNeighbor(ev.getPeer());
-						System.out.println("Added Neighbor - " + ev.getPeer().getIp() + " to my view");
-					} else {
-						//data
-						//pub/sub
+					if(coord.checkDistance(ev.getPeer().getCoord()) || neighbors.size() <= 4) {
+						if(ev.isJoin()) {
+							addNeighbor(ev.getPeer());
+							System.out.println("Added Neighbor - " + ev.getPeer().getIp() + " to my view");
+						} else {
+							//data
+							//pub/sub
+						}
+					} else if (neighbors.size() == 5) {
+						events.put(new Event("View of node is full"));
+						System.out.println("My view is full");
+						//else discard
+					}else{
+						System.out.println("the event was discarded due to distance");
 					}
-				} else if (neighbors.size() == 5) {
-					events.put(new Event("View of node is full"));
-					System.out.println("My view is full");
-					//else discard
+
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
 			}
-
 		}
 	}
 
 	public void publish(Event e) {
+		PubSub.printPub(e);
 		try {
 			events.put(e);
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
 	}
-
 
 	/*
 	 * TODO
@@ -233,10 +242,10 @@ public class Peer implements Serializable {
 					} catch (IOException | InterruptedException e1) {
 						e1.printStackTrace();
 					}
-					
+
 					DatagramPacket send = null;
 
-					if(neighbors.isEmpty()) {
+					if(ev.isJoin()) {
 						send = new DatagramPacket(sendData, sendData.length, 
 								ev.getConnectTo(), ev.getPortConnectTo());
 						System.out.println("Trying to add myself to " + ev.getConnectTo() + " view");
@@ -246,19 +255,14 @@ public class Peer implements Serializable {
 									p.getIp(), p.getPort());
 						}
 					}
-					
+
 					try {
 						socket.send(send);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-
-
 				}
 			}
-
 		}
-
 	}
-
 }
