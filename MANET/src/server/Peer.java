@@ -23,7 +23,6 @@ public class Peer implements Serializable {
 
 	private static final long serialVersionUID = 4318690273286226312L;
 
-	private transient List<byte[]> receiveArray;
 	private transient List<Peer> neighbors;
 	private transient BlockingQueue<Event> events;
 	private transient DatagramSocket socket;
@@ -32,8 +31,10 @@ public class Peer implements Serializable {
 	private InetAddress ip;
 	private int port;
 	private Coordinate coord;
+	private int NETWORK_DIAMETER;
 
-	public Peer(int port, InetAddress ip, Coordinate coord) {
+	public Peer(int port, InetAddress ip, Coordinate coord,
+			int network) {
 		this.ip = ip;
 		this.setPort(port);
 		try {
@@ -41,8 +42,8 @@ public class Peer implements Serializable {
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
+		NETWORK_DIAMETER = network;
 		neighbors = new LinkedList<>();
-		receiveArray = new LinkedList<>();
 		events = new LinkedBlockingQueue<>();
 		this.setCoord(coord);
 		new ReceiveThread().start();
@@ -178,8 +179,17 @@ public class Peer implements Serializable {
 							addNeighbor(ev.getPeer());
 							System.out.println("Added Neighbor - " + ev.getPeer().getIp() + " to my view");
 						} else {
-							//data
-							//pub/sub
+							if(pubsub.getSubscriptions().contains(ev.getType()))
+								PubSub.printPub(ev);
+
+							int currentCounter = ev.getCounter();
+							if(currentCounter < NETWORK_DIAMETER) {
+								//forward message to send and increase counter
+								ev.setCounter(currentCounter++);
+								events.put(ev);
+							} else
+								System.out.println("Message discarded, since the "
+										+ "number of hops surpassed the network diameter");
 						}
 					} else if (neighbors.size() == 5) {
 						events.put(new Event("View of node is full"));
@@ -203,6 +213,7 @@ public class Peer implements Serializable {
 	public void publish(Event e) {
 		PubSub.printPub(e);
 		try {
+			pubsub.getPublishings().add(e);
 			events.put(e);
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
@@ -249,18 +260,40 @@ public class Peer implements Serializable {
 						send = new DatagramPacket(sendData, sendData.length, 
 								ev.getConnectTo(), ev.getPortConnectTo());
 						System.out.println("Trying to add myself to " + ev.getConnectTo() + " view");
+
+						try {
+							socket.send(send);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					} else {
-						for(Peer p : neighbors) {
-							send = new DatagramPacket(sendData, sendData.length, 
-									p.getIp(), p.getPort());
+						int nNodes = neighbors.size()/2;
+						List<Integer> rands = new LinkedList<>();
+
+						Random rand = new Random();
+						for(int i = 0; i < nNodes;) {
+
+							while(true) {
+								int randNum = rand.nextInt(neighbors.size());
+								if(!rands.contains(randNum)) {
+									rands.add(randNum);
+									Peer neighbor = neighbors.get(randNum);
+									send = new DatagramPacket(sendData, sendData.length,
+											neighbor.getIp(), neighbor.getPort());
+									System.out.println("Event sent to neighbor " +
+											neighbor.getIp());
+									try {
+										socket.send(send);
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+									break;
+								}
+							}
+
 						}
 					}
-
-					try {
-						socket.send(send);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					System.out.println("All events were forwaded!");
 				}
 			}
 		}

@@ -14,7 +14,8 @@ public class Event implements Serializable{
 	private boolean join;
 	private Peer peer;
 	
-	private EventType type; 
+	private EventType type;
+	private int counter;
 	private String message;
 	private InetAddress connectTo;
 	private int portConnectTo;
@@ -95,6 +96,14 @@ public class Event implements Serializable{
 
 	@Override
 	public String toString() {
-		return "[ TYPE: " + type + (isJoin()?"isJoin" + peer:"Isn'tJoin") + "MESSAGE: [ " + message + " ]" + "IP: " + connectTo + "PORT: " + portConnectTo;
+		return "[ TYPE: " + type + (isJoin()?"isJoin" + peer:"Isn'tJoin") + "\nMESSAGE: [ " + message + " ] \nIP: " + connectTo + "PORT: " + portConnectTo;
+	}
+
+	public int getCounter() {
+		return counter;
+	}
+
+	public void setCounter(int counter) {
+		this.counter = counter;
 	}
 }
