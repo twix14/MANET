@@ -58,6 +58,7 @@ public class Server {
 					String[] split = s.split(" ");
 					e.setType(EventType.valueOf(split[1]));
 					e.setMessage(split[2]);
+					e.setCounter(0);
 					p.publish(e);
 					System.out.println("Event published!");
 				} else if(s.contains("subscribe")) {

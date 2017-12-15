@@ -31,7 +31,7 @@ public class Coordinate implements Serializable {
 	
 	public boolean checkDistance(Coordinate c1) {
 		return Math.sqrt(Math.pow(c1.getLat() - lat, 2) 
-				+ Math.pow(c1.getLng() - lng, 2)) > 200;
+				+ Math.pow(c1.getLng() - lng, 2)) < 200;
 	}
 	
 	

@@ -24,6 +24,7 @@ public class Peer implements Serializable {
 	private static final long serialVersionUID = 4318690273286226312L;
 
 	private transient List<Peer> neighbors;
+	private transient List<String> messages;
 	private transient BlockingQueue<Event> events;
 	private transient DatagramSocket socket;
 	private transient PubSub pubsub;
@@ -44,6 +45,7 @@ public class Peer implements Serializable {
 		}
 		pubsub = new PubSub();
 		NETWORK_DIAMETER = network;
+		messages = new LinkedList<>();
 		neighbors = new LinkedList<>();
 		events = new LinkedBlockingQueue<>();
 		this.setCoord(coord);
@@ -175,22 +177,28 @@ public class Peer implements Serializable {
 					Event ev = Event.deserializeBA(receive.getData());
 					System.out.println("Data received");
 
-					if(coord.checkDistance(ev.getPeer().getCoord()) || neighbors.size() <= 4) {
+					if(coord.checkDistance(ev.getPeer().getCoord()) && neighbors.size() <= 4) {
 						if(ev.isJoin()) {
 							addNeighbor(ev.getPeer());
 							System.out.println("Added Neighbor - " + ev.getPeer().getIp() + " to my view");
 						} else {
-							if(pubsub.getSubscriptions().contains(ev.getType()))
-								PubSub.printPub(ev);
 
-							int currentCounter = ev.getCounter();
-							if(currentCounter < NETWORK_DIAMETER) {
-								//forward message to send and increase counter
-								ev.setCounter(currentCounter++);
-								events.put(ev);
-							} else
-								System.out.println("Message discarded, since the "
-										+ "number of hops surpassed the network diameter");
+							if(!messages.contains(ev.getMessage())) {
+								messages.add(ev.getMessage());
+								if(pubsub.getSubscriptions().contains(ev.getType()))
+									PubSub.printPub(ev);
+
+								int currentCounter = ev.getCounter();
+								if(currentCounter < NETWORK_DIAMETER) {
+									//forward message to send and increase counter
+									ev.setCounter(currentCounter++);
+									events.put(ev);
+								} else
+									System.out.println("Message discarded, since the "
+											+ "number of hops surpassed the network diameter");
+							}
+
+
 						}
 					} else if (neighbors.size() == 5) {
 						events.put(new Event("View of node is full"));
@@ -250,14 +258,18 @@ public class Peer implements Serializable {
 					Event ev = null;
 					try {
 						ev = events.take();
-						sendData = Event.serializeBA(ev);
-					} catch (IOException | InterruptedException e1) {
+					} catch (InterruptedException e1) {
 						e1.printStackTrace();
 					}
 
 					DatagramPacket send = null;
 
 					if(ev.isJoin()) {
+						try {
+							sendData = Event.serializeBA(ev);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
 						send = new DatagramPacket(sendData, sendData.length, 
 								ev.getConnectTo(), ev.getPortConnectTo());
 						System.out.println("Trying to add myself to " + ev.getConnectTo() + " view");
@@ -268,7 +280,8 @@ public class Peer implements Serializable {
 							e.printStackTrace();
 						}
 					} else {
-						int nNodes = neighbors.size()/2;
+						double div = ((double)neighbors.size())/2;
+						int nNodes = (int) Math.ceil(div);
 						List<Integer> rands = new LinkedList<>();
 
 						Random rand = new Random();
@@ -279,6 +292,12 @@ public class Peer implements Serializable {
 								if(!rands.contains(randNum)) {
 									rands.add(randNum);
 									Peer neighbor = neighbors.get(randNum);
+									ev.setPeer(neighbor);
+									try {
+										sendData = Event.serializeBA(ev);
+									} catch (IOException e1) {
+										e1.printStackTrace();
+									}
 									send = new DatagramPacket(sendData, sendData.length,
 											neighbor.getIp(), neighbor.getPort());
 									System.out.println("Event sent to neighbor " +
@@ -286,6 +305,7 @@ public class Peer implements Serializable {
 									try {
 										socket.send(send);
 									} catch (IOException e) {
+										//TODO CHURN entrada e saida
 										e.printStackTrace();
 									}
 									break;
@@ -295,7 +315,7 @@ public class Peer implements Serializable {
 						}
 						System.out.println("All events were forwaded!");
 					}
-					
+
 				}
 			}
 		}
