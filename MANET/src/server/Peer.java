@@ -167,8 +167,8 @@ public class Peer implements Serializable {
 		public void run() {
 			while(true) {
 				try {
-					int lng = coord.getLng();
-					int lat = coord.getLat();
+					double lng = coord.getLng();
+					double lat = coord.getLat();
 					Random rad = new Random();
 					int option = rad.nextInt(8);
 					switch(option) {

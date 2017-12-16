@@ -5,27 +5,27 @@ import java.io.Serializable;
 public class Coordinate implements Serializable {
 	private static final long serialVersionUID = -7888511295412357123L;
 	
-	private int lat;
-	private int lng;
+	private double lat;
+	private double lng;
 	
 	public Coordinate(String lat, String lng) {
-		this.setLat(Integer.parseInt(lat));
-		this.setLng(Integer.parseInt(lng));
+		this.setLat(Double.parseDouble(lat));
+		this.setLng(Double.parseDouble(lng));
 	}
 
-	public int getLat() {
+	public double getLat() {
 		return lat;
 	}
 
-	public void setLat(int lat) {
+	public void setLat(double  lat) {
 		this.lat = lat;
 	}
 
-	public int getLng() {
+	public double getLng() {
 		return lng;
 	}
 
-	public void setLng(int lng) {
+	public void setLng(double lng) {
 		this.lng = lng;
 	}
 	
