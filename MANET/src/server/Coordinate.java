@@ -30,8 +30,18 @@ public class Coordinate implements Serializable {
 	}
 	
 	public boolean checkDistance(Coordinate c1) {
-		return Math.sqrt(Math.pow(c1.getLat() - lat, 2) 
-				+ Math.pow(c1.getLng() - lng, 2)) < 200;
+		double radius = 6371000; // metres
+		double lat1 = Math.toRadians(lat);
+		double lat2 = Math.toRadians(c1.getLat());
+		double lat = Math.toRadians(c1.getLat()- this.lat);
+		double longt = Math.toRadians(c1.getLng() - this.lng);
+
+		double a = Math.sin(lat/2) * Math.sin(lat/2) +
+		        Math.cos(lat1) * Math.cos(lat2) *
+		        Math.sin(longt/2) * Math.sin(longt/2);
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+		
+		return radius * c < 200;
 	}
 	
 	
