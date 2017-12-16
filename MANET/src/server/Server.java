@@ -35,7 +35,7 @@ public class Server {
 		}
 		
 		Scanner sc = new Scanner(System.in);
-		System.out.println("Peer started!");
+		System.out.println("Node started!");
 		try {
 			System.out.println("'start' to add myself to another view");
 			System.out.println("'publish' 'eventype' 'message'");

@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.PortUnreachableException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
@@ -49,6 +50,7 @@ public class Peer implements Serializable {
 		neighbors = new LinkedList<>();
 		events = new LinkedBlockingQueue<>();
 		this.setCoord(coord);
+		new ChangeLocation().start();
 		new ReceiveThread().start();
 		new SendThread().start();
 	}
@@ -158,6 +160,57 @@ public class Peer implements Serializable {
 
 	public void setCoord(Coordinate coord) {
 		this.coord = coord;
+	}
+	
+	private class ChangeLocation extends Thread {
+		
+		public void run() {
+			while(true) {
+				try {
+					int lng = coord.getLng();
+					int lat = coord.getLat();
+					Random rad = new Random();
+					int option = rad.nextInt(8);
+					switch(option) {
+						case 0: //variate latitude positive, longitude stays the same
+							coord.setLat(lat++);
+							break;
+						case 1: //variate latitude negative, longitude stays the same
+							coord.setLat(lat--);
+							break;
+						case 2: //variate longitude positive, latitude stays the same
+							coord.setLng(lng++);
+							break;
+						case 3: //variate longitude negative, latitude stays the same
+							coord.setLng(lng--);
+							break;
+						case 4: //variate longitude negative, latitude positive
+							coord.setLng(lng--);
+							coord.setLat(lat++);
+							break;
+						case 5: //variate longitude positive, latitude negative
+							coord.setLng(lng--);
+							coord.setLat(lat++);
+							break;
+						case 6: //variate longitude positive, latitude positive
+							coord.setLng(lng++);
+							coord.setLat(lat++);
+							break;
+						case 7: //variate longitude negative, latitude negative
+							coord.setLng(lng--);
+							coord.setLat(lat--);
+							break;
+					}
+					System.out.println("Moved from (" + lat + "," + lng + ") to "
+							+ " (" + coord.getLat() + "," + coord.getLng() + ")");
+					
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 	}
 
 	private class ReceiveThread extends Thread {
@@ -304,10 +357,13 @@ public class Peer implements Serializable {
 											neighbor.getIp());
 									try {
 										socket.send(send);
-									} catch (IOException e) {
-										//TODO CHURN entrada e saida
+									} catch (PortUnreachableException e) {
+										neighbors.remove(randNum);
 										e.printStackTrace();
-									}
+										System.err.println("Node left the view");
+									} catch (IOException e) {
+										e.printStackTrace();
+									} 
 									break;
 								}
 							}
