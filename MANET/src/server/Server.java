@@ -65,7 +65,9 @@ public class Server {
 					String[] split = s.split(" ");
 					p.subscribe(EventType.valueOf(split[1]));
 					System.out.println("EventType subscribed!");
-				} else {
+				} else if(s.contains("move")){
+					p.move();
+				}else	{
 					System.out.println("Try again!");
 					
 					System.out.println("'start' to add myself to another view");

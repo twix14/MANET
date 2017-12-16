@@ -50,9 +50,12 @@ public class Peer implements Serializable {
 		neighbors = new LinkedList<>();
 		events = new LinkedBlockingQueue<>();
 		this.setCoord(coord);
-		new ChangeLocation().start();
 		new ReceiveThread().start();
 		new SendThread().start();
+	}
+	
+	public void move() {
+		new ChangeLocation().start();
 	}
 
 	public void start(){
@@ -173,32 +176,32 @@ public class Peer implements Serializable {
 					int option = rad.nextInt(8);
 					switch(option) {
 						case 0: //variate latitude positive, longitude stays the same
-							coord.setLat(lat++);
+							coord.setLat(lat+=0.000001);
 							break;
 						case 1: //variate latitude negative, longitude stays the same
-							coord.setLat(lat--);
+							coord.setLat(lat-=0.000001);
 							break;
 						case 2: //variate longitude positive, latitude stays the same
-							coord.setLng(lng++);
+							coord.setLng(lng+=0.000001);
 							break;
 						case 3: //variate longitude negative, latitude stays the same
-							coord.setLng(lng--);
+							coord.setLng(lng-=0.000001);
 							break;
 						case 4: //variate longitude negative, latitude positive
 							coord.setLng(lng--);
-							coord.setLat(lat++);
+							coord.setLat(lat+=0.000001);
 							break;
 						case 5: //variate longitude positive, latitude negative
-							coord.setLng(lng--);
-							coord.setLat(lat++);
+							coord.setLng(lng-=0.000001);
+							coord.setLat(lat+=0.000001);
 							break;
 						case 6: //variate longitude positive, latitude positive
-							coord.setLng(lng++);
-							coord.setLat(lat++);
+							coord.setLng(lng+=0.000001);
+							coord.setLat(lat+=0.000001);
 							break;
 						case 7: //variate longitude negative, latitude negative
-							coord.setLng(lng--);
-							coord.setLat(lat--);
+							coord.setLng(lng-=0.000001);
+							coord.setLat(lat-=0.000001);
 							break;
 					}
 					System.out.println("Moved from (" + lat + "," + lng + ") to "
@@ -333,12 +336,13 @@ public class Peer implements Serializable {
 							e.printStackTrace();
 						}
 					} else {
+						messages.add(ev.getMessage());
 						double div = ((double)neighbors.size())/2;
 						int nNodes = (int) Math.ceil(div);
 						List<Integer> rands = new LinkedList<>();
 
 						Random rand = new Random();
-						for(int i = 0; i < nNodes;) {
+						for(int i = 0; i < nNodes; i++) {
 
 							while(true) {
 								int randNum = rand.nextInt(neighbors.size());
@@ -353,8 +357,6 @@ public class Peer implements Serializable {
 									}
 									send = new DatagramPacket(sendData, sendData.length,
 											neighbor.getIp(), neighbor.getPort());
-									System.out.println("Event sent to neighbor " +
-											neighbor.getIp());
 									try {
 										socket.send(send);
 									} catch (PortUnreachableException e) {
@@ -364,6 +366,8 @@ public class Peer implements Serializable {
 									} catch (IOException e) {
 										e.printStackTrace();
 									} 
+									System.out.println("Event sent to neighbor " +
+											neighbor.getIp());
 									break;
 								}
 							}
