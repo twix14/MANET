@@ -206,6 +206,8 @@ public class Peer implements Serializable {
 							try {
 								lock.lock();
 								neighbors.remove(p);
+								System.out.println("Node left the view after being "
+										+ "offline for a while");
 							} finally {
 								lock.unlock();
 							}
