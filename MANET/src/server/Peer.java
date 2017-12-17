@@ -211,10 +211,17 @@ public class Peer implements Serializable {
 							} finally {
 								lock.unlock();
 							}
+						} else {
+							try {
+								lock.lock();
+								p.setAlive(false);
+							} finally {
+								lock.unlock();
+							}
 						}
 					}
 					
-					Thread.sleep(3000);
+					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -356,7 +363,7 @@ public class Peer implements Serializable {
 
 
 						}
-					} else if (neighbors.size() == 5) {
+					} else if (neighbors.size() == 5 && !ev.isHeartbeat()) {
 						System.out.println("My view is full");
 						//else discard
 					}else{
