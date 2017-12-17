@@ -19,7 +19,7 @@ public class Pair {
 	    if (this.getPeer().getPort() != other.getPort())
 	        return false;
 	    
-	    if (this.getPeer().getIp().getHostAddress() != other.getIp().getHostAddress()) 
+	    if (!this.getPeer().getIp().getHostAddress().equals(other.getIp().getHostAddress())) 
 	        return false;
 	    
 	    return true;
