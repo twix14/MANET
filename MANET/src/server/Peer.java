@@ -37,7 +37,7 @@ public class Peer implements Serializable {
 	private int port;
 	private Coordinate coord;
 	private int NETWORK_DIAMETER;
-	
+
 	private ReentrantLock lock = new ReentrantLock();
 
 	public Peer(int port, InetAddress ip,
@@ -61,21 +61,21 @@ public class Peer implements Serializable {
 		new HeartBeat(this).start();
 		new CleanHeartBeats().start();
 	}
-	
+
 	private Coordinate generateCoord(double initLat, double endLat, double initLng,
 			double endLng) {
 		Random rand = new Random();
 		double lat = rand.nextDouble() * (endLat - initLat) + initLat;
 		double lng = rand.nextDouble() * (endLng - initLng) + initLng;
-		
+
 		return new Coordinate(String.valueOf(lat), String.valueOf(lng));
 	}
-	
+
 	public Peer(InetAddress ip, int port) {
 		this.ip = ip;
 		this.setPort(port);
 	}
-	
+
 	public void move() {
 		new ChangeLocation().start();
 	}
@@ -194,13 +194,14 @@ public class Peer implements Serializable {
 	public void setCoord(Coordinate coord) {
 		this.coord = coord;
 	}
-	
+
 	private class CleanHeartBeats extends Thread {
-		
+
 		public void run() {
 			while(true) {
 				try {
-					for(Pair p : neighbors) {
+					for(int i = 0; i < neighbors.size(); i++) {
+						Pair p = neighbors.get(i);
 						if(!p.isAlive()) {
 							try {
 								lock.lock();
@@ -219,24 +220,24 @@ public class Peer implements Serializable {
 							}
 						}
 					}
-					
+
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-	
+
 	}
-	
+
 	private class HeartBeat extends Thread {
-		
+
 		private Peer peer;
-		
+
 		public HeartBeat(Peer p) {
 			this.peer = p;
 		}
-		
+
 		public void run() {
 			while(true) {
 				try {
@@ -248,7 +249,7 @@ public class Peer implements Serializable {
 						heartbeat.setPortConnectTo(p.getPort());
 						events.put(heartbeat);
 					}
-					
+
 					Thread.sleep(1500);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -256,9 +257,9 @@ public class Peer implements Serializable {
 			}
 		}
 	}
-	
+
 	private class ChangeLocation extends Thread {
-		
+
 		public void run() {
 			while(true) {
 				try {
@@ -267,45 +268,45 @@ public class Peer implements Serializable {
 					Random rad = new Random();
 					int option = rad.nextInt(8);
 					switch(option) {
-						case 0: //variate latitude positive, longitude stays the same
-							coord.setLat(lat+=0.000001);
-							break;
-						case 1: //variate latitude negative, longitude stays the same
-							coord.setLat(lat-=0.000001);
-							break;
-						case 2: //variate longitude positive, latitude stays the same
-							coord.setLng(lng+=0.000001);
-							break;
-						case 3: //variate longitude negative, latitude stays the same
-							coord.setLng(lng-=0.000001);
-							break;
-						case 4: //variate longitude negative, latitude positive
-							coord.setLng(lng-=0.000001);
-							coord.setLat(lat+=0.000001);
-							break;
-						case 5: //variate longitude positive, latitude negative
-							coord.setLng(lng-=0.000001);
-							coord.setLat(lat+=0.000001);
-							break;
-						case 6: //variate longitude positive, latitude positive
-							coord.setLng(lng+=0.000001);
-							coord.setLat(lat+=0.000001);
-							break;
-						case 7: //variate longitude negative, latitude negative
-							coord.setLng(lng-=0.000001);
-							coord.setLat(lat-=0.000001);
-							break;
+					case 0: //variate latitude positive, longitude stays the same
+						coord.setLat(lat+=0.000001);
+						break;
+					case 1: //variate latitude negative, longitude stays the same
+						coord.setLat(lat-=0.000001);
+						break;
+					case 2: //variate longitude positive, latitude stays the same
+						coord.setLng(lng+=0.000001);
+						break;
+					case 3: //variate longitude negative, latitude stays the same
+						coord.setLng(lng-=0.000001);
+						break;
+					case 4: //variate longitude negative, latitude positive
+						coord.setLng(lng-=0.000001);
+						coord.setLat(lat+=0.000001);
+						break;
+					case 5: //variate longitude positive, latitude negative
+						coord.setLng(lng-=0.000001);
+						coord.setLat(lat+=0.000001);
+						break;
+					case 6: //variate longitude positive, latitude positive
+						coord.setLng(lng+=0.000001);
+						coord.setLat(lat+=0.000001);
+						break;
+					case 7: //variate longitude negative, latitude negative
+						coord.setLng(lng-=0.000001);
+						coord.setLat(lat-=0.000001);
+						break;
 					}
 					System.out.println("Moved from (" + lat + "," + lng + ") to "
 							+ " (" + coord.getLat() + "," + coord.getLng() + ")");
-					
+
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		
+
 	}
 
 	private class ReceiveThread extends Thread {
@@ -331,17 +332,21 @@ public class Peer implements Serializable {
 						} else if(ev.isHeartbeat()) {
 							Peer neighbor = ev.getPeer();
 							Pair aux = new Pair(neighbor, true);
-							int index = neighbors.indexOf(aux);
-							if(index != -1) {
-								try {
-									lock.lock();
+							try {
+								lock.lock();
+								int index = neighbors.indexOf(aux);
+								if(index != -1) {
+
+
 									neighbors.set(index, aux);
-								} finally {
-									lock.unlock();
+
 								}
+
+							} finally {
+								lock.unlock();
 							}
 						} else {
-						
+
 
 							if(!messages.contains(ev.getMessage())) {
 								messages.add(ev.getMessage());
@@ -452,7 +457,7 @@ public class Peer implements Serializable {
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
-					
+
 					}	else {
 						messages.add(ev.getMessage());
 						double div = ((double)neighbors.size())/2;
@@ -466,34 +471,31 @@ public class Peer implements Serializable {
 								int randNum = rand.nextInt(neighbors.size());
 								if(!rands.contains(randNum)) {
 									rands.add(randNum);
-									Peer neighbor = neighbors.get(randNum).getPeer();
-									ev.setPeer(neighbor);
 									try {
-										sendData = Event.serializeBA(ev);
-									} catch (IOException e1) {
-										e1.printStackTrace();
-									}
-									send = new DatagramPacket(sendData, sendData.length,
-											neighbor.getIp(), neighbor.getPort());
-									try {
+										lock.lock();
+
+										Peer neighbor = neighbors.get(randNum).getPeer();
+										ev.setPeer(neighbor);
+										try {
+											sendData = Event.serializeBA(ev);
+										} catch (IOException e1) {
+											e1.printStackTrace();
+										}
+										send = new DatagramPacket(sendData, sendData.length,
+												neighbor.getIp(), neighbor.getPort());
 										socket.send(send);
 										if(!neighbors.get(randNum).isAlive()) {
-											try {
-												lock.lock();
-												neighbors.remove(randNum);
-											} finally {
-												lock.unlock();
-											}
-											
-											System.err.println("Node left the view after "
-													+ "being inactive for a while...");
+											neighbors.remove(randNum);
 										}
-										
-									} catch (IOException e) {
+
+
+										System.out.println("Event sent to neighbor " +
+												neighbor.getIp());
+									}catch (IOException e) {
 										e.printStackTrace();
-									} 
-									System.out.println("Event sent to neighbor " +
-											neighbor.getIp());
+									} finally {
+										lock.unlock();
+									}
 									break;
 								}
 							}
@@ -505,20 +507,20 @@ public class Peer implements Serializable {
 			}
 		}
 	}
-	
+
 	public boolean equals(Object obj) {
 		if (obj == null)
-	        return false;
-		
-	    final Peer other = (Peer) obj;
-	    
-	    if (this.port != other.port)
-	        return false;
-	    
-	    if (this.ip.getHostAddress() != other.ip.getHostAddress()) 
-	        return false;
-	    
-	    return true;
+			return false;
+
+		final Peer other = (Peer) obj;
+
+		if (this.port != other.port)
+			return false;
+
+		if (this.ip.getHostAddress() != other.ip.getHostAddress()) 
+			return false;
+
+		return true;
 	}
-	
+
 }
