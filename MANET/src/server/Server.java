@@ -28,8 +28,7 @@ public class Server {
 		Peer p = null;
 		try {
 			p = new Peer(Integer.parseInt(args[0]), 
-					InetAddress.getByName(args[1]), 
-					new Coordinate(args[2], args[3]), networkSize);
+					InetAddress.getByName(args[1]), networkSize);
 		} catch (NumberFormatException | UnknownHostException e) {
 			e.printStackTrace();
 		}

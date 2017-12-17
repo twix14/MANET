@@ -12,6 +12,7 @@ public class Event implements Serializable{
 	private static final long serialVersionUID = -962652137307409545L;
 
 	private boolean join;
+	private boolean heartbeat;
 	private Peer peer;
 	
 	private EventType type;
@@ -105,5 +106,13 @@ public class Event implements Serializable{
 
 	public void setCounter(int counter) {
 		this.counter = counter;
+	}
+
+	public boolean isHeartbeat() {
+		return heartbeat;
+	}
+
+	public void setHeartbeat(boolean heartbeat) {
+		this.heartbeat = heartbeat;
 	}
 }
