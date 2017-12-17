@@ -185,7 +185,6 @@ public class Peer implements Serializable {
 		} finally {
 			lock.unlock();
 		}
-		
 	}
 
 	public Coordinate getCoord() {
@@ -215,6 +214,7 @@ public class Peer implements Serializable {
 							try {
 								lock.lock();
 								p.setAlive(false);
+								System.out.println("Node set to false");
 							} finally {
 								lock.unlock();
 							}
@@ -223,12 +223,11 @@ public class Peer implements Serializable {
 					
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		}
-		
+	
 	}
 	
 	private class HeartBeat extends Thread {
@@ -249,15 +248,15 @@ public class Peer implements Serializable {
 						heartbeat.setConnectTo(p.getIp());
 						heartbeat.setPortConnectTo(p.getPort());
 						events.put(heartbeat);
+						System.out.println("Heartbeat sent");
 					}
 					
-					Thread.sleep(1500);
+					Thread.sleep(2500);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		
 	}
 	
 	private class ChangeLocation extends Thread {
@@ -332,6 +331,7 @@ public class Peer implements Serializable {
 							addNeighbor(ev.getPeer());
 							System.out.println("Added Neighbor - " + ev.getPeer().getIp() + " to my view");
 						} else if(ev.isHeartbeat()) {
+							System.out.println("Heartbeat received");
 							Peer neighbor = ev.getPeer();
 							Pair aux = new Pair(neighbor, true);
 							int index = neighbors.indexOf(aux);
