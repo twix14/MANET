@@ -317,7 +317,6 @@ public class Peer implements Serializable {
 				try {
 					socket.receive(receive);
 					Event ev = Event.deserializeBA(receive.getData());
-					System.out.println("Data received");
 
 					if(coord.checkDistance(ev.getPeer().getCoord()) && neighbors.size() <= 4) {
 						if(ev.isJoin()) {
@@ -356,7 +355,6 @@ public class Peer implements Serializable {
 
 						}
 					} else if (neighbors.size() == 5) {
-						events.put(new Event("View of node is full"));
 						System.out.println("My view is full");
 						//else discard
 					}else{
@@ -442,7 +440,6 @@ public class Peer implements Serializable {
 						}
 						send = new DatagramPacket(sendData, sendData.length, 
 								ev.getConnectTo(), ev.getPortConnectTo());
-						System.out.println("Sending heartbeat to " + ev.getConnectTo());
 
 						try {
 							socket.send(send);
@@ -496,7 +493,6 @@ public class Peer implements Serializable {
 							}
 
 						}
-						System.out.println("All events were forwaded!");
 					}
 
 				}
