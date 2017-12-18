@@ -26,11 +26,24 @@ public class Server {
 	public Server(String[] args) {
 		int networkSize = removeSelf(args);
 		Peer p = null;
-		try {
-			p = new Peer(Integer.parseInt(args[0]), 
-					InetAddress.getByName(args[1]), networkSize);
-		} catch (NumberFormatException | UnknownHostException e) {
-			e.printStackTrace();
+
+		if(args.length == 2) {
+			try {
+				p = new Peer(Integer.parseInt(args[0]), 
+						InetAddress.getByName(args[1]), networkSize);
+			} catch (NumberFormatException | UnknownHostException e) {
+				e.printStackTrace();
+			}
+		} else if (args.length == 4) {
+			try {
+				p = new Peer(Integer.parseInt(args[0]), 
+						InetAddress.getByName(args[1]), networkSize, args[2], args[3]);
+			} catch (NumberFormatException | UnknownHostException e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("Try again with the right commands, please :D");
+			System.exit(0);
 		}
 
 		Scanner sc = new Scanner(System.in);
@@ -46,6 +59,8 @@ public class Server {
 			System.out.println("CAR_STRANDED");
 			System.out.println("DAMSEL_IN_DISTRESS");
 			System.out.println("'subscribe' 'eventype'");
+			System.out.println("'move' to randomly start moving");
+			System.out.println("'stop' to stop moving");
 			while(true) {
 				String s = sc.nextLine();
 				String[] split = s.split(" ");
@@ -54,7 +69,7 @@ public class Server {
 					p.start();
 				} else if(split[0].equals("publish")) {
 					Event e = new Event();
-					
+
 					StringBuilder sb = new StringBuilder();
 					for(int i = 2; i < split.length; i++) {
 						sb.append(split[i] + " ");

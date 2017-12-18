@@ -62,6 +62,30 @@ public class Peer implements Serializable {
 		new HeartBeat(this).start();
 		new CleanHeartBeats().start();
 	}
+	
+	public Peer(int port, InetAddress ip,
+			int network, String lat, String lng) {
+		this.ip = ip;
+		this.setPort(port);
+		try {
+			socket = new DatagramSocket(port);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		pubsub = new PubSub();
+		NETWORK_DIAMETER = network+1;
+		messages = new LinkedList<>();
+		neighbors = new LinkedList<>();
+		connections =  new LinkedList<>();
+		events = new LinkedBlockingQueue<>();
+		this.setCoord(new Coordinate(lat, lng));
+		new ReceiveThread().start();
+		new SendThread().start();
+		new HeartBeat(this).start();
+		new CleanHeartBeats().start();
+	}
+	
+	
 
 	private Coordinate generateCoord(double initLat, double endLat, double initLng,
 			double endLng) {
