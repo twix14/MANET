@@ -50,7 +50,7 @@ public class Peer implements Serializable {
 			e.printStackTrace();
 		}
 		pubsub = new PubSub();
-		NETWORK_DIAMETER = network;
+		NETWORK_DIAMETER = network+1;
 		messages = new LinkedList<>();
 		neighbors = new LinkedList<>();
 		connections =  new LinkedList<>();
