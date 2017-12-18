@@ -97,7 +97,7 @@ public class Event implements Serializable{
 
 	@Override
 	public String toString() {
-		return "[ TYPE: " + type + (isJoin()?"isJoin" + peer:"Isn'tJoin") + "\nMESSAGE: [ " + message + " ] \nIP: " + connectTo + "PORT: " + portConnectTo;
+		return "[ TYPE: " + type + "\nMESSAGE: [ " + message + " ] ]";
 	}
 
 	public int getCounter() {

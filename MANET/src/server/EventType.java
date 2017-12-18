@@ -5,7 +5,7 @@ public enum EventType {
 	STREET_FIRE("Fire in the streets"),
 	INJURY("Injured person"),
 	BROKEN_CABLE_LINE("Coms line needs fixing"),
-	CARD_STRANDED("Car surrounded by fire"),
+	CAR_STRANDED("Car surrounded by fire"),
 	DAMSEL_IN_DISTRESS("There's a damnsel in distress");
 
 	private final String text;

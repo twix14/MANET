@@ -32,53 +32,60 @@ public class Server {
 		} catch (NumberFormatException | UnknownHostException e) {
 			e.printStackTrace();
 		}
-		
+
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Node started!");
 		try {
 			System.out.println("'start' to add myself to another view");
 			System.out.println("'publish' 'eventype' 'message'");
 			System.out.println("Type of eventTypes - ");
-			System.out.println("House on fire");
-			System.out.println("Fire in the streets");
-			System.out.println("Injured people");
-			System.out.println("Coms line needs fixing");
-			System.out.println("Cars surrounded by fire");
-			System.out.println("There's some damsel in distress");
+			System.out.println("HOUSE_FIRE");
+			System.out.println("STREET_FIRE");
+			System.out.println("INJURY");
+			System.out.println("BROKEN_CABLE_LINE");
+			System.out.println("CAR_STRANDED");
+			System.out.println("DAMSEL_IN_DISTRESS");
 			System.out.println("'subscribe' 'eventype'");
 			while(true) {
 				String s = sc.nextLine();
-				
-				
-				if(s.contains("start")) {
+
+
+				if(s.equals("start")) {
 					p.start();
-				} else if(s.contains("publish")) {
+				} else if(s.equals("publish")) {
 					Event e = new Event();
 					String[] split = s.split(" ");
-					e.setType(EventType.valueOf(split[1]));
-					e.setMessage(split[2]);
-					e.setCounter(0);
-					p.publish(e);
-					System.out.println("Event published!");
-				} else if(s.contains("subscribe")) {
+					StringBuilder sb = new StringBuilder();
+					for(int i = 2; i < split.length; i++) {
+						sb.append(split[i] + " ");
+					}
+					try {
+						e.setType(EventType.valueOf(split[1]));
+						e.setMessage(sb.toString());
+						e.setCounter(0);
+						p.publish(e);
+						System.out.println("Event published!");
+					} catch (IllegalArgumentException e1) {
+						System.out.println("EventType doesn't exist, try again");
+						continue;
+					}
+
+				} else if(s.equals("subscribe")) {
 					String[] split = s.split(" ");
-					p.subscribe(EventType.valueOf(split[1]));
-					System.out.println("EventType subscribed!");
-				} else if(s.contains("move")){
+					try {
+						p.subscribe(EventType.valueOf(split[1]));
+						System.out.println("EventType subscribed!");
+					} catch (IllegalArgumentException e) {
+						System.out.println("EventType doesn't exist, try again");
+						continue;
+					}
+
+				} else if(s.equals("move")){
 					p.move();
-				}else	{
+				} else if (s.equals("stop")) {
+					p.stop();
+				}	else {
 					System.out.println("Try again!");
-					
-					System.out.println("'start' to add myself to another view");
-					System.out.println("'publish' 'eventype' 'message'");
-					System.out.println("Type of eventTypes - ");
-					System.out.println("House on fire");
-					System.out.println("Fire in the streets");
-					System.out.println("Injured people");
-					System.out.println("Coms line needs fixing");
-					System.out.println("Cars surrounded by fire");
-					System.out.println("There's some damsel in distress");
-					System.out.println("'subscribe' 'eventype'");
 				}
 			}
 

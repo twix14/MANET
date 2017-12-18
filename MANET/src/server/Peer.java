@@ -32,6 +32,7 @@ public class Peer implements Serializable {
 	private transient BlockingQueue<Event> events;
 	private transient DatagramSocket socket;
 	private transient PubSub pubsub;
+	private transient ChangeLocation loc;
 
 	private InetAddress ip;
 	private int port;
@@ -77,11 +78,20 @@ public class Peer implements Serializable {
 	}
 
 	public void move() {
-		new ChangeLocation().start();
+		loc = new ChangeLocation();
+		loc.start();
+	}
+	
+	public void stop() {
+		loc.kill();
 	}
 
 	public void start(){
 		String viewPeer = getInetAddress();
+		if(viewPeer.equals("")) {
+			System.out.println("No more nodes to be added! File is empty");
+			return;
+		}
 		Event ev = new Event();
 		String[] split = viewPeer.split(":");
 		InetAddress inet = null;
@@ -130,6 +140,9 @@ public class Peer implements Serializable {
 				e.printStackTrace();
 			}
 		}
+		
+		if(ips.size() == 0)
+			return "";
 
 		int rand = new Random().nextInt(ips.size());
 		String result = ips.get(rand);
@@ -259,9 +272,11 @@ public class Peer implements Serializable {
 	}
 
 	private class ChangeLocation extends Thread {
+		
+		private volatile boolean alive = true;
 
 		public void run() {
-			while(true) {
+			while(alive) {
 				try {
 					double lng = coord.getLng();
 					double lat = coord.getLat();
@@ -305,6 +320,10 @@ public class Peer implements Serializable {
 					e.printStackTrace();
 				}
 			}
+		}
+		
+		public void kill() {
+			alive = false;
 		}
 
 	}
