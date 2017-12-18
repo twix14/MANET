@@ -48,13 +48,13 @@ public class Server {
 			System.out.println("'subscribe' 'eventype'");
 			while(true) {
 				String s = sc.nextLine();
+				String[] split = s.split(" ");
 
-
-				if(s.equals("start")) {
+				if(split[0].equals("start")) {
 					p.start();
-				} else if(s.equals("publish")) {
+				} else if(split[0].equals("publish")) {
 					Event e = new Event();
-					String[] split = s.split(" ");
+					
 					StringBuilder sb = new StringBuilder();
 					for(int i = 2; i < split.length; i++) {
 						sb.append(split[i] + " ");
@@ -70,8 +70,7 @@ public class Server {
 						continue;
 					}
 
-				} else if(s.equals("subscribe")) {
-					String[] split = s.split(" ");
+				} else if(split[0].equals("subscribe")) {
 					try {
 						p.subscribe(EventType.valueOf(split[1]));
 						System.out.println("EventType subscribed!");
@@ -80,9 +79,9 @@ public class Server {
 						continue;
 					}
 
-				} else if(s.equals("move")){
+				} else if(split[0].equals("move")){
 					p.move();
-				} else if (s.equals("stop")) {
+				} else if (split[0].equals("stop")) {
 					p.stop();
 				}	else {
 					System.out.println("Try again!");
